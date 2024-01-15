@@ -15,7 +15,7 @@ from recipes.constants import (
 User = get_user_model()
 
 
-class Teg(models.Model):
+class Tag(models.Model):
     """
     Модель тега.
     """
@@ -99,10 +99,9 @@ class Recipe(models.Model):
         verbose_name='Ингредиент',
     )
 
-    teg = models.ForeignKey(
-        Teg,
+    teg = models.ManyToManyField(
+        Tag,
         verbose_name='Тег',
-        on_delete=models.CASCADE,
         blank=False,
     )
 
