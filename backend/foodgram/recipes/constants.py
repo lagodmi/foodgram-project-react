@@ -13,7 +13,7 @@ MAX_LEN_UNIT_INGREDIENT = 250
 # Table Recipe.
 MAX_LEN_NAME_RECIPE = 250
 
-UPLOAD_TO = 'recipes/',
+UPLOAD_TO_IMAGE_RECIPE = 'recipes/',
 
 
 
