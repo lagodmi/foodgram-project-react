@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-# from django.utils.text import slugify
 
 from recipes.constants import (
     MAX_LEN_NAME_TAG,
@@ -11,7 +10,6 @@ from recipes.constants import (
     MAX_LEN_NAME_RECIPE,
     UPLOAD_TO_IMAGE_RECIPE
 )
-# from recipes.generator_RGB import RandomColorGenerator
 
 
 User = get_user_model()
@@ -38,15 +36,6 @@ class Tag(models.Model):
         max_length=MAX_LEN_NAME_SLUG,
         unique=True,
     )
-
-    # def save(self, *args, **kwargs):
-    #     """
-    #     Автозаполнение color.
-        # """
-    #     if not self.color_code:
-    #         color_generator = RandomColorGenerator()
-    #         self.color_code = color_generator.random_RGB()
-    #     super(Tag, self).save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Тег'
