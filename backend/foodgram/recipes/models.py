@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+# from django.utils.text import slugify
 
 from recipes.constants import (
     MAX_LEN_NAME_TAG,
@@ -10,6 +11,7 @@ from recipes.constants import (
     MAX_LEN_NAME_RECIPE,
     UPLOAD_TO_IMAGE_RECIPE
 )
+# from recipes.generator_RGB import RandomColorGenerator
 
 
 User = get_user_model()
@@ -25,7 +27,7 @@ class Tag(models.Model):
         unique=True,
     )
 
-    color_code = models.CharField(
+    color = models.CharField(
         verbose_name='Цветовой код',
         max_length=MAX_LEN_COLOR_CODE_TAG,
         unique=True,
@@ -36,6 +38,15 @@ class Tag(models.Model):
         max_length=MAX_LEN_NAME_SLUG,
         unique=True,
     )
+
+    # def save(self, *args, **kwargs):
+    #     """
+    #     Автозаполнение color.
+        # """
+    #     if not self.color_code:
+    #         color_generator = RandomColorGenerator()
+    #         self.color_code = color_generator.random_RGB()
+    #     super(Tag, self).save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Тег'
@@ -56,7 +67,7 @@ class Ingredient(models.Model):
         max_length=MAX_LEN_NAME_INGREDIENT,
     )
 
-    measurement_unit = models.SlugField(
+    measurement_unit = models.CharField(
         verbose_name='Единица измерения',
         max_length=MAX_LEN_UNIT_INGREDIENT,
     )
@@ -98,10 +109,10 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         verbose_name='Ингредиент',
-        through='RecipeIngredients',
+        through='RecipeIngredient',
     )
 
-    teg = models.ManyToManyField(
+    tag = models.ManyToManyField(
         Tag,
         verbose_name='Тег',
         blank=False,
