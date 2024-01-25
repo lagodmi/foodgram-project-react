@@ -1,13 +1,14 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from users.constants_users import (
+from .config import (
     MAX_LEN_NICKNAME,
     MAX_LEN_EMAIL,
     MAX_LEN_NAME,
     MAX_LEN_SURNAME,
+    MAX_LEN_PASSWORD
 )
-from users.validators import user_validator
+from .validators import user_validator
 
 
 class User(AbstractUser):
@@ -15,7 +16,7 @@ class User(AbstractUser):
     Модель пользователя.
     """
 
-    nickname = models.CharField(
+    username = models.CharField(
         'Логин',
         max_length=MAX_LEN_NICKNAME,
         unique=True,
@@ -23,41 +24,62 @@ class User(AbstractUser):
     )
 
     email = models.EmailField(
-        'Электронная почта',
+        verbose_name='Электронная почта',
         max_length=MAX_LEN_EMAIL,
         unique=True
     )
 
-    name = models.CharField(
-        'Имя пользователя',
+    first_name = models.CharField(
+        verbose_name='Имя пользователя',
         max_length=MAX_LEN_NAME,
     )
 
-    surname = models.CharField(
-        'Фамилия пользователя',
+    last_name = models.CharField(
+        verbose_name='Фамилия пользователя',
         max_length=MAX_LEN_SURNAME,
     )
 
+    password = models.CharField(
+        verbose_name='Пароль',
+        max_length=MAX_LEN_PASSWORD,
+    )
+
+    # @property
+    # def is_authenticated(self):
+    #     """"
+    #     Всегда возвращает True. Способ был ли пользователь аутентифицирован.
+    #     """
+    #     return True
+
     class Meta:
-        ordering = ('nickname',)
+        ordering = ('username',)
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
     def __str__(self):
-        return self.nickname
+        return self.username
 
 
-# from django.core.validators import validate_slug
-# from django.core.exceptions import ValidationError
-#     nickname = models.CharField(
-#         'Логин',
-#         max_length=constants_users.MAX_LEN_NICKNAME,
-#         unique=True,
-#     )
+class Follower(models.Model):
+    """
+    Модель подписки
+    """
+    user = models.ForeignKey(
+        User,
+        verbose_name='Пользователь',
+        related_name='owner',
+        on_delete=models.CASCADE
+    )
 
-#     def clean(self):
-#         super().clean()
-#         try:
-#             validate_slug(self.nickname)
-#         except ValidationError:
-#             raise ValidationError({'nickname': 'Логин содержит недопустимые символы'})
+    subscriber = models.ForeignKey(
+        User,
+        verbose_name='Подписчик',
+        related_name='subscribers',
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        unique_together = ('user', 'subscriber')
+
+    def __str__(self):
+        return f'{self.subscriber} подписан на {self.user}'
