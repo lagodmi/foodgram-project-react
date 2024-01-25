@@ -73,6 +73,8 @@ class Follower(models.Model):
 
     class Meta:
         unique_together = ('user', 'subscriber')
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
 
     def __str__(self):
         return f'{self.subscriber} подписан на {self.user}'

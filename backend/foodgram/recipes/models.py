@@ -41,7 +41,7 @@ class Tag(models.Model):
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
         default_related_name = 'tags'
-        ordering = ('pk',)
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -65,7 +65,7 @@ class Ingredient(models.Model):
         verbose_name = 'Ингридиент'
         verbose_name_plural = 'Ингридиенты'
         default_related_name = 'ingredients'
-        ordering = ('pk',)
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -155,25 +155,52 @@ class RecipeIngredient(models.Model):
         return f'{str(self.recipe)}{str(self.ingredient)}{self.amount}'
 
 
-class ShoppingList(models.Model):
+class Shopping(models.Model):
     """
     Модель список покупок.
     """
     user = models.ForeignKey(
         User,
         verbose_name='Пользователь',
+        related_name='shopping_man',
         on_delete=models.CASCADE,
     )
+
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='Рецепт',
+        related_name='shopping_lists',
         on_delete=models.CASCADE,
     )
 
     class Meta:
         verbose_name = 'Покупка'
         verbose_name_plural = 'Список Покупок'
-        default_related_name = 'shoppinglist'
+        default_related_name = 'shopping'
 
     def __str__(self):
         return self.recipe
+
+
+class Favorite(models.Model):
+    """
+    Модель избранное.
+    """
+    user = models.ForeignKey(
+        User,
+        verbose_name='Пользователь',
+        related_name='favorite_recipes',
+        on_delete=models.CASCADE,
+    )
+
+    recipe = models.ForeignKey(
+        Recipe,
+        verbose_name='Рецепт',
+        related_name='favorite_by',
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранные'
+        default_related_name = 'shopping'

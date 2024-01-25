@@ -4,6 +4,9 @@ from .models import (
     Tag,
     Ingredient,
     Recipe,
+    RecipeIngredient,
+    Shopping,
+    Favorite
 )
 
 
@@ -12,21 +15,24 @@ admin.site.site_header = 'Админ-панель сайта "FOODGRAM"'
 admin.site.empty_value_display = 'Не задано'
 
 
+class BaseModelAdmin(admin.ModelAdmin):
+    save_on_top = True
+    save_as = True
+
+    class Meta:
+        abstract = True
+
+
 @admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'color', 'slug')
-    list_editable = ('name', 'color', 'slug')
+class TagAdmin(BaseModelAdmin):
+    list_display = ('name', 'color', 'slug')
     prepopulated_fields = {'slug': ('name',)}
 
 
 @admin.register(Ingredient)
-class IngredientAdmin(admin.ModelAdmin):
-    list_display = (
-        'pk', 'name', 'measurement_unit'
-    )
-    list_editable = (
-        'name', 'measurement_unit'
-    )
+class IngredientAdmin(BaseModelAdmin):
+    list_display = ('name', 'measurement_unit')
+    list_filter = ('name',)
 
 
 class IngredientsInLine(admin.TabularInline):
@@ -35,13 +41,23 @@ class IngredientsInLine(admin.TabularInline):
 
 
 @admin.register(Recipe)
-class RecipeAdmin(admin.ModelAdmin):
-    save_on_top = True  # бар сверху
-    save_as = True  # бар 'сохранить как новый объект'
-    list_filter = ('author',)  # фильтрация
+class RecipeAdmin(BaseModelAdmin):
+    list_filter = ('author', 'name', 'tag')
     inlines = (IngredientsInLine,)
-    search_fields = ('author__username', 'name',)  # поиск
-    list_display = (
-        'pk', 'author', 'name', 'cooking_time',
-        'description', 'date',
-    )
+    search_fields = ('author__username', 'name',)
+    list_display = ('name', 'author')
+
+
+@admin.register(RecipeIngredient)
+class RecipeIngredientAdmin(BaseModelAdmin):
+    list_display = ('recipe', 'ingredient', 'amount')
+
+
+@admin.register(Shopping)
+class ShoppingListAdmin(BaseModelAdmin):
+    list_display = ('user', 'recipe')
+
+
+@admin.register(Favorite)
+class FavoriteListAdmin(BaseModelAdmin):
+    list_display = ('user', 'recipe')

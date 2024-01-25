@@ -6,9 +6,9 @@ from .models import User, Follower
 @admin.register(User)
 class AthUserAdmin(admin.ModelAdmin):
 
-    list_display = ('id', 'username', 'email', 'first_name', 'last_name')
+    list_display = ('username', 'email', 'first_name', 'last_name')
     fields = ('username', 'email', 'first_name', 'last_name')
-    list_display_links = ('id', 'username',)
+    list_display_links = ('username',)
     list_filter = ('username', 'email')
 
 
