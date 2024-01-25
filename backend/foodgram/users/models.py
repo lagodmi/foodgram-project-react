@@ -44,13 +44,6 @@ class User(AbstractUser):
         max_length=MAX_LEN_PASSWORD,
     )
 
-    # @property
-    # def is_authenticated(self):
-    #     """"
-    #     Всегда возвращает True. Способ был ли пользователь аутентифицирован.
-    #     """
-    #     return True
-
     class Meta:
         ordering = ('username',)
         verbose_name = 'Пользователь'
