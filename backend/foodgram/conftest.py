@@ -21,7 +21,7 @@ COLORS_DICT = {
 
 
 @pytest.fixture
-def tag_create(name='red', color='#FF0000'):
+def tag_create_fix(name='red', color='#FF0000'):
     """
     Фикстура на создание одного тега.
     """
@@ -33,13 +33,13 @@ def tag_create(name='red', color='#FF0000'):
 
 
 @pytest.fixture
-def tags_create():
+def tags_create_fix():
     """
     Фикстура на создание списка тегов.
     Проверка пагинации.
     """
     for name, color in COLORS_DICT:
-        tag_create(name, color)
+        tag_create_fix(name, color)
 
 
 @pytest.fixture
@@ -49,5 +49,3 @@ def ingredient_create(name='red', color='#FF0000'):
         color=color
     )
     return ingredient
-
-
