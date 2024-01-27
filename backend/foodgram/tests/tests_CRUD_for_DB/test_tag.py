@@ -1,10 +1,8 @@
-from django.test import TestCase
 import pytest
 
 from recipes.models import Tag
 
 
-# CRUD DB
 @pytest.mark.django_db
 def test_create_tag():
     assert Tag.objects.count() == 0
@@ -31,6 +29,5 @@ def test_update_tag(tag_create_fix):
 @pytest.mark.django_db
 def test_delete_tag(tag_create_fix):
     assert Tag.objects.count() == 1
-    tag = Tag.objects.first()
-    tag.delete()
+    Tag.objects.first().delete()
     assert Tag.objects.count() == 0

@@ -1,7 +1,9 @@
-from django.contrib.auth import get_user_model
+from typing import Optional
+
 from django.db import models
 
-from recipes.constants import (
+from users.models import User
+from .constants import (
     MAX_LEN_NAME_TAG,
     MAX_LEN_COLOR_CODE_TAG,
     MAX_LEN_NAME_SLUG,
@@ -10,9 +12,6 @@ from recipes.constants import (
     MAX_LEN_NAME_RECIPE,
     UPLOAD_TO_IMAGE_RECIPE
 )
-
-
-User = get_user_model()
 
 
 class Tag(models.Model):
@@ -71,6 +70,18 @@ class Ingredient(models.Model):
         return self.name
 
 
+class RecipeQuerySet(models.QuerySet):
+
+    def add_user_annotations(self, user_id: Optional[int]):
+        return self.annotate(
+            is_favorite=models.Exists(
+                Favorite.objects.filter(
+                    user_id=user_id, recipe__pk=models.OuterRef('pk')
+                )
+            ),
+        )
+
+
 class Recipe(models.Model):
     """
     Модель рецепта.
@@ -97,8 +108,9 @@ class Recipe(models.Model):
 
     ingredients = models.ManyToManyField(
         Ingredient,
-        verbose_name='Ингредиент',
+        verbose_name='Ингредиенты',
         through='RecipeIngredient',
+        through_fields=('recipe', 'ingredient'),
     )
 
     tag = models.ManyToManyField(
@@ -116,6 +128,8 @@ class Recipe(models.Model):
         auto_now_add=True
     )
 
+    objects = RecipeQuerySet.as_manager()
+
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
@@ -132,7 +146,7 @@ class RecipeIngredient(models.Model):
     """
     recipe = models.ForeignKey(
         Recipe,
-        verbose_name='рецепт',
+        verbose_name='Рецепт',
         on_delete=models.CASCADE,
     )
 
@@ -143,7 +157,7 @@ class RecipeIngredient(models.Model):
     )
 
     amount = models.PositiveIntegerField(
-        verbose_name='количество ингридиента'
+        verbose_name='Количество ингридиента'
     )
 
     class Meta:
@@ -152,7 +166,7 @@ class RecipeIngredient(models.Model):
         default_related_name = 'recipeingredient'
 
     def __str__(self):
-        return f'{str(self.recipe)}{str(self.ingredient)}{self.amount}'
+        return f'{str(self.recipe)} - {str(self.ingredient)} {self.amount}'
 
 
 class Shopping(models.Model):
@@ -201,6 +215,12 @@ class Favorite(models.Model):
     )
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='unique_favorite_user_recipe'
+            )
+        ]
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные'
-        default_related_name = 'shopping'
+        default_related_name = 'favorite'
