@@ -5,7 +5,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 
 from .serializers import (
-    TagSerializer, IngredientSerializer, RecipeSerializer, UserSerializer
+    TagSerializer, IngredientSerializer, RecipeSerializer, UserSignupSerializer
 )
 from recipes.models import (
     Tag, Ingredient, Recipe
@@ -34,17 +34,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 
 class UserViewSet(UserViewSet):
-    serializer_class = UserSerializer
+    serializer_class = UserSignupSerializer
     queryset = User.objects.all()
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+    def create(self, request):
+        serializer = UserSignupSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            user = serializer.save()  # Сохраняем пользователя и получаем объект
+            response_data = serializer.data  # Получаем данные сериализатора
+            response_data['id'] = user.id  # Добавляем ID к данным ответа
+            return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        # def post(self, request, *args, **kwargs):
-        # response = super().post(request, *args, **kwargs)
-        # response.status_code = status.HTTP_200_OK
-        # return response

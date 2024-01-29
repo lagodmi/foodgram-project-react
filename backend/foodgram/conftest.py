@@ -9,7 +9,7 @@ from recipes.models import (
 
 User = get_user_model()
 
-
+# fixture for CRUD DB.
 COLORS_DICT = {
     'red': '#FF0000',
     'orange': '#FFA500',
@@ -128,3 +128,8 @@ def user_create_fix():
         password='12345'
     )
     return user
+
+
+@pytest.fixture
+def url_create_user_fix():
+    return "http://127.0.0.1:8000/api/users/"
