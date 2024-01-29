@@ -1,10 +1,13 @@
 from datetime import datetime
 from django.apps import apps
+from django.contrib.auth import get_user_model
 import pytest
 
 from recipes.models import (
     Tag, Ingredient, Recipe, RecipeIngredient, Shopping)
-from users.models import User
+
+
+User = get_user_model()
 
 
 COLORS_DICT = {

@@ -16,6 +16,9 @@ class User(AbstractUser):
     Модель пользователя.
     """
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ('username',)
+
     username = models.CharField(
         'Логин',
         max_length=MAX_LEN_NICKNAME,
