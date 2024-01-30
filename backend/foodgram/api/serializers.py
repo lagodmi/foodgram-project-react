@@ -104,3 +104,20 @@ class UserSignupSerializer(serializers.Serializer):
                 raise serializers.ValidationError(errors)
             attrs['user'] = users.first()
         return attrs
+
+
+class UserListSerializer(serializers.Serializer):
+    """
+    Сериалайзер для списка пользователей.
+    """
+    id = serializers.ImageField()
+    email = serializers.EmailField(max_length=MAX_LEN_EMAIL)
+    username = serializers.CharField(
+        max_length=MAX_LEN_NICKNAME,
+        validators=(user_validator,)
+    )
+    first_name = serializers.CharField(max_length=MAX_LEN_NAME)
+    last_name = serializers.CharField(max_length=MAX_LEN_SURNAME)
+
+    class Meta:
+        model = User
