@@ -70,6 +70,10 @@ class UserSignupSerializer(serializers.Serializer):
     )
     first_name = serializers.CharField(max_length=MAX_LEN_NAME)
     last_name = serializers.CharField(max_length=MAX_LEN_SURNAME)
+    password = serializers.CharField(
+        max_length=MAX_LEN_PASSWORD,
+        write_only=True
+    )
 
     def create(self, validated_data):
         user = validated_data.get('user')
