@@ -18,16 +18,6 @@ ERROR_MESSAGE_SIGNUP = ('Поле {} не соответствует '
                         'пользователю с данным {}.')
 
 
-class RecipeSerializer(serializers.ModelSerializer):
-    """
-    Сериализатор для модели рецепта.
-    """
-
-    class Meta:
-        model = Recipe
-        fields = '__all__'
-
-
 class TagSerializer(serializers.ModelSerializer):
     """
     Сериализатор для модели тега.
@@ -98,3 +88,13 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         instance.set_password(validated_data['new_password'])
         instance.save()
         return validated_data
+
+
+class RecipeSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для модели рецепта.
+    """
+
+    class Meta:
+        model = Recipe
+        fields = '__all__'

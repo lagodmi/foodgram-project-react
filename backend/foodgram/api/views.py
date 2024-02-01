@@ -28,12 +28,6 @@ from .pagination import CustomPagination
 User = get_user_model()
 
 
-class RecipeViewSet(ModelViewSet):
-    serializer_class = RecipeSerializer
-    queryset = Recipe.objects.all()
-    http_method_names = ['get']
-
-
 class UserViewSet(UserViewSet):
     """
     ViewSet пользователя.
@@ -91,3 +85,11 @@ class IngredientViewSet(ModelViewSet):
     filter_backends = (NameFilter,)
     search_fields = ('^name',)
     http_method_names = ('get',)
+
+
+class RecipeViewSet(ModelViewSet):
+    """
+    ViewSet рецепта.
+    """
+    serializer_class = RecipeSerializer
+    queryset = Recipe.objects.all()

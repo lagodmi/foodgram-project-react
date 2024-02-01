@@ -42,7 +42,7 @@ class IngredientsInLine(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(BaseModelAdmin):
-    list_filter = ('author', 'name', 'tag')
+    list_filter = ('author', 'name', 'tags')
     inlines = (IngredientsInLine,)
     search_fields = ('author__username', 'name',)
     list_display = ('name', 'author')

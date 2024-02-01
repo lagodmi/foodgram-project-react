@@ -102,7 +102,7 @@ class Recipe(models.Model):
         upload_to=UPLOAD_TO_IMAGE_RECIPE,
     )
 
-    description = models.TextField(
+    text = models.TextField(
         verbose_name='Описание',
     )
 
@@ -113,7 +113,7 @@ class Recipe(models.Model):
         through_fields=('recipe', 'ingredient'),
     )
 
-    tag = models.ManyToManyField(
+    tags = models.ManyToManyField(
         Tag,
         verbose_name='Тег',
         blank=False,
