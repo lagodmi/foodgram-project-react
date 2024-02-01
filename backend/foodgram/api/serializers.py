@@ -1,25 +1,14 @@
-import re
-
-from django.core.validators import validate_email
-from django.db.models import Q
 from django.contrib.auth import get_user_model
-from djoser.views import UserViewSet
+from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
-from rest_framework.fields import SerializerMethodField
 
 from recipes.models import (
     Tag,
     Recipe,
     Ingredient
 )
-
 from users.models import Follower
-from users.validators import user_validator
 from users.config import (
-    MAX_LEN_NICKNAME,
-    MAX_LEN_EMAIL,
-    MAX_LEN_NAME,
-    MAX_LEN_SURNAME,
     MAX_LEN_PASSWORD
 )
 
@@ -59,65 +48,53 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class UserSignupSerializer(serializers.Serializer):
+class UserCreateSerializer(UserCreateSerializer):
     """
     Сериализатор для регистрации пользователя.
     """
-    email = serializers.EmailField(max_length=MAX_LEN_EMAIL)
-    username = serializers.CharField(
-        max_length=MAX_LEN_NICKNAME,
-        validators=(user_validator,)
-    )
-    first_name = serializers.CharField(max_length=MAX_LEN_NAME)
-    last_name = serializers.CharField(max_length=MAX_LEN_SURNAME)
-    password = serializers.CharField(
-        max_length=MAX_LEN_PASSWORD,
-        write_only=True
-    )
-
-    def create(self, validated_data):
-        user = validated_data.get('user')
-        if user is None:
-            user = User.objects.create(**validated_data)
-        return user
-
-    def validate(self, attrs):
-        email = attrs.get('email')
-        username = attrs.get('username')
-        password = attrs.get('password')
-        errors = {}
-        users = User.objects.filter(
-            Q(email=email) | Q(username=username)
-        )
-        if users:
-            if not password:
-                errors['password'] = 'Пароль отсутствует.'
-            if any(user.username != username for user in users):
-                errors['email'] = ERROR_MESSAGE_SIGNUP.format(
-                    'username', 'email'
-                )
-            if any(user.email != email for user in users):
-                errors['username'] = ERROR_MESSAGE_SIGNUP.format(
-                    'email', 'username'
-                )
-            if errors:
-                raise serializers.ValidationError(errors)
-            attrs['user'] = users.first()
-        return attrs
-
-
-class UserListSerializer(serializers.Serializer):
-    """
-    Сериалайзер для списка пользователей.
-    """
-    id = serializers.ImageField()
-    email = serializers.EmailField(max_length=MAX_LEN_EMAIL)
-    username = serializers.CharField(
-        max_length=MAX_LEN_NICKNAME,
-        validators=(user_validator,)
-    )
-    first_name = serializers.CharField(max_length=MAX_LEN_NAME)
-    last_name = serializers.CharField(max_length=MAX_LEN_SURNAME)
 
     class Meta:
         model = User
+        fields = ('id', 'email', 'username',
+                  'first_name', 'last_name', 'password')
+        read_only_fields = ('id',)
+
+
+class UserListSerializer(UserSerializer):
+    """
+    Сериалайзер для списка пользователей.
+    """
+    is_subscribed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ('email', 'id', 'username',
+                  'first_name', 'last_name',
+                  'is_subscribed')
+
+    def get_is_subscribed(self, obj):
+        # Проверяем, подписан ли текущий пользователь на пользователя obj
+        request = self.context.get('request')
+        if request and not request.user.is_anonymous:
+            return (Follower.objects.
+                    filter(user=request.user, subscriber=obj).exists())
+        return False
+
+
+class ChangePasswordSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор смены пароля.
+    """
+    current_password = serializers.CharField(max_length=MAX_LEN_PASSWORD)
+    new_password = serializers.CharField(max_length=MAX_LEN_PASSWORD)
+
+    class Meta:
+        model = User
+        fields = ('current_password', 'new_password')
+
+    def update(self, instance, validated_data):
+        if not instance.check_password(validated_data['current_password']):
+            raise serializers.ValidationError('Неправильный пароль.')
+        instance.set_password(validated_data['new_password'])
+        instance.save()
+        return validated_data

@@ -1,73 +1,93 @@
-from django.shortcuts import render
 from django.contrib.auth import get_user_model
 from djoser.views import UserViewSet
-from rest_framework import viewsets, status, permissions
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (
+    AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+)
+from rest_framework.status import (
+    HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_401_UNAUTHORIZED
+)
+from rest_framework.viewsets import (
+    ModelViewSet, ReadOnlyModelViewSet
+)
 
 from .serializers import (
-    TagSerializer, IngredientSerializer, RecipeSerializer, UserSignupSerializer,
-    UserListSerializer
+    TagSerializer, IngredientSerializer,
+    RecipeSerializer, UserCreateSerializer,
+    UserListSerializer, ChangePasswordSerializer
 )
 from recipes.models import (
     Tag, Ingredient, Recipe
 )
 from users.models import Follower
-from .permissions import UserPermission
+from .filters import NameFilter
 from .pagination import CustomPagination
 
 
 User = get_user_model()
 
 
-class TagViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = TagSerializer
-    queryset = Tag.objects.all()
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-    pagination_class = None
-
-
-class IngredientViewSet(viewsets.ModelViewSet):
-    serializer_class = IngredientSerializer
-    queryset = Ingredient.objects.all()
-    http_method_names = ['get']
-
-
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(ModelViewSet):
     serializer_class = RecipeSerializer
     queryset = Recipe.objects.all()
     http_method_names = ['get']
 
 
 class UserViewSet(UserViewSet):
+    """
+    ViewSet пользователя.
+    """
     queryset = User.objects.all()
-    # permission_classes = UserPermission
     pagination_class = CustomPagination
 
-    def create(self, request):
-        serializer = UserSignupSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            response_data = serializer.data
-            response_data['id'] = user.id
-            return Response(response_data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-        data = serializer.data
-        return Response(data)
-
     def get_serializer_class(self):
-        """Получение произведений."""
         if self.action in ('create', 'update', 'partial_update'):
-            return UserSignupSerializer
+            return UserCreateSerializer
         return UserListSerializer
 
     def get_permissions(self):
         if self.action == 'list':
-            permission_classes = [permissions.AllowAny]
+            permission_classes = [AllowAny]
         else:
-            permission_classes = [permissions.AllowAny]
+            permission_classes = [AllowAny]
         return [permission() for permission in permission_classes]
+
+    @action(detail=False, methods=['get'], pagination_class=None,
+            permission_classes=(IsAuthenticated,))
+    def me(self, request):
+        if not request.user.is_authenticated:
+            return Response(status=HTTP_401_UNAUTHORIZED)
+        return Response(
+            UserListSerializer(request.user).data, status=HTTP_200_OK
+        )
+
+    @action(detail=False, methods=['post'],
+            permission_classes=(IsAuthenticated,))
+    def set_password(self, request):
+        serializer = ChangePasswordSerializer(request.user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response('Пароль сохранен.', status=HTTP_204_NO_CONTENT)
+
+
+class TagViewSet(ReadOnlyModelViewSet):
+    """
+    ViewSet тега.
+    """
+    serializer_class = TagSerializer
+    queryset = Tag.objects.all()
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    pagination_class = None
+
+
+class IngredientViewSet(ModelViewSet):
+    """
+    ViewSet ингридиента.
+    """
+    serializer_class = IngredientSerializer
+    queryset = Ingredient.objects.all()
+    pagination_class = None
+    filter_backends = (NameFilter,)
+    search_fields = ('^name',)
+    http_method_names = ('get',)
