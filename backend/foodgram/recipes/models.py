@@ -12,6 +12,7 @@ from .constants import (
     MAX_LEN_NAME_RECIPE,
     UPLOAD_TO_IMAGE_RECIPE
 )
+from .validators import cooking_time_validator
 
 
 class Tag(models.Model):
@@ -120,7 +121,8 @@ class Recipe(models.Model):
     )
 
     cooking_time = models.PositiveIntegerField(
-        verbose_name='Время готовки'
+        verbose_name='Время готовки',
+        validators=(cooking_time_validator,)
     )
 
     date = models.DateTimeField(
