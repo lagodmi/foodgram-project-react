@@ -55,7 +55,7 @@ class RecipeIngredientAdmin(BaseModelAdmin):
 
 @admin.register(Shopping)
 class ShoppingListAdmin(BaseModelAdmin):
-    list_display = ('user', 'recipe')
+    list_display = ('id', 'user', 'recipe')
 
 
 @admin.register(Favorite)

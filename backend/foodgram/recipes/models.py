@@ -185,7 +185,7 @@ class Shopping(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='Рецепт',
-        related_name='shopping_lists',
+        related_name='shopping_list',
         on_delete=models.CASCADE,
     )
 
@@ -195,7 +195,7 @@ class Shopping(models.Model):
         default_related_name = 'shopping'
 
     def __str__(self):
-        return self.recipe
+        return self.recipe.name
 
 
 class Favorite(models.Model):
