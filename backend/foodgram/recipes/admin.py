@@ -12,7 +12,7 @@ from .models import (
 
 admin.site.site_title = 'Админ-панель сайта "FOODGRAM"'
 admin.site.site_header = 'Админ-панель сайта "FOODGRAM"'
-admin.site.empty_value_display = 'Не задано'
+admin.site.empty_value_display = "Не задано"
 
 
 class BaseModelAdmin(admin.ModelAdmin):
@@ -25,14 +25,14 @@ class BaseModelAdmin(admin.ModelAdmin):
 
 @admin.register(Tag)
 class TagAdmin(BaseModelAdmin):
-    list_display = ('name', 'color', 'slug')
-    prepopulated_fields = {'slug': ('name',)}
+    list_display = ("name", "color", "slug")
+    prepopulated_fields = {"slug": ("name",)}
 
 
 @admin.register(Ingredient)
 class IngredientAdmin(BaseModelAdmin):
-    list_display = ('name', 'measurement_unit')
-    list_filter = ('name',)
+    list_display = ("name", "measurement_unit")
+    list_filter = ("name",)
 
 
 class IngredientsInLine(admin.TabularInline):
@@ -42,22 +42,25 @@ class IngredientsInLine(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(BaseModelAdmin):
-    list_filter = ('author', 'name', 'tag')
+    list_filter = ("author", "name", "tags")
     inlines = (IngredientsInLine,)
-    search_fields = ('author__username', 'name',)
-    list_display = ('name', 'author')
+    search_fields = (
+        "author__username",
+        "name",
+    )
+    list_display = ("name", "author")
 
 
 @admin.register(RecipeIngredient)
 class RecipeIngredientAdmin(BaseModelAdmin):
-    list_display = ('recipe', 'ingredient', 'amount')
+    list_display = ("recipe", "ingredient", "amount")
 
 
 @admin.register(Shopping)
 class ShoppingListAdmin(BaseModelAdmin):
-    list_display = ('user', 'recipe')
+    list_display = ("id", "user", "recipe")
 
 
 @admin.register(Favorite)
 class FavoriteListAdmin(BaseModelAdmin):
-    list_display = ('user', 'recipe')
+    list_display = ("user", "recipe")

@@ -11,13 +11,13 @@ def test_create_recipe(admin_user, ingredient_create_fix, tag_create_fix):
     recipe = Recipe.objects.create(
         author=admin_user,
         name='пирог',
-        description='описание',
+        text='описание',
         image='tests/торт.webp',
         cooking_time=10,
         date=datetime.now()
     )
 
-    apps.get_model('recipes', 'recipe_tag').objects.create(
+    apps.get_model('recipes', 'recipe_tags').objects.create(
         recipe=recipe,
         tag=tag_create_fix
     )

@@ -1,27 +1,36 @@
 from datetime import datetime
+import requests
+
 from django.apps import apps
+from django.contrib.auth import get_user_model
 import pytest
 
 from recipes.models import (
     Tag, Ingredient, Recipe, RecipeIngredient, Shopping)
-from users.models import User
+from tests.constants import USER
 
 
-COLORS_DICT = {
-    'red': '#FF0000',
-    'orange': '#FFA500',
-    'yellow': '#FFFF00',
-    'green': '#008000',
-    'blue': '#0000FF',
-    'indigo': '#4B0082',
-    'violet': '#EE82EE',
-    'black': '#000000',
-    'white': '#FFFFFF',
-    'gray': '#808080',
-    'pink': '#FFC0CB'
+User = get_user_model()
+
+
+# Fixture for CRUD DB.
+
+
+TAGS_DICT: dict = {
+    'обед': '#FF0000',
+    'завтрак': '#FFA500',
+    'полдник': '#FFFF00',
+    'перекус': '#008000',
+    'ужин': '#0000FF',
+    'ланч': '#4B0082',
+    'поздний ужин': '#EE82EE',
+    'чай': '#000000',
+    'десерт': '#FFFFFF',
+    'выпечка': '#808080',
+    'сладкое': '#FFC0CB'
 }
 
-UNITS_DICT = {
+UNITS_DICT: dict = {
     "абрикосовое варенье": "г",
     "абрикосовое пюре": "г",
     "абрикосовый джем": "г",
@@ -54,12 +63,15 @@ def tags_create_fix():
     Фикстура на создание списка тегов.
     Проверка пагинации.
     """
-    for name, color in COLORS_DICT:
+    for name, color in TAGS_DICT:
         tag_create_fix(name, color)
 
 
 @pytest.fixture
 def ingredient_create_fix(name='абрикосовое варенье', measurement_unit='г'):
+    """
+    Фикстура на создание одного ингредиента.
+    """
     ingredient = Ingredient.objects.create(
         name=name,
         measurement_unit=measurement_unit
@@ -87,13 +99,13 @@ def recipe_create_fix(
     recipe = Recipe.objects.create(
         author=admin_user,
         name=name,
-        description='описание',
+        text='описание',
         image='tests/торт.webp',
         cooking_time=10,
         date=datetime.now()
     )
 
-    apps.get_model('recipes', 'recipe_tag').objects.create(
+    apps.get_model('recipes', 'recipe_tags').objects.create(
         recipe=recipe,
         tag=tag_create_fix
     )
@@ -108,6 +120,9 @@ def recipe_create_fix(
 
 @pytest.fixture
 def shopping_create_fix(admin_user, recipe_create_fix):
+    """
+    Фикстура на добавление рецепта в корзину.
+    """
     shopping = Shopping.objects.create(
         user=admin_user,
         recipe=recipe_create_fix
@@ -117,6 +132,9 @@ def shopping_create_fix(admin_user, recipe_create_fix):
 
 @pytest.fixture
 def user_create_fix():
+    """
+    Фикстура на создание пользователя.
+    """
     user = User.objects.create(
         username='Толстый_Лев',
         email='lion@mail.ru',
@@ -125,3 +143,22 @@ def user_create_fix():
         password='12345'
     )
     return user
+
+
+# Fixture check URL.
+
+
+@pytest.fixture
+def auth_token():
+    """
+    Фикстура на получение токена.
+    """
+    url = 'http://127.0.0.1:8000/api/auth/token/login/'
+    credentials = {
+        'email': USER['email'],
+        'password': USER['password']
+    }
+
+    response = requests.post(url, json=credentials)
+    token = response.json().get('auth_token')
+    return token
