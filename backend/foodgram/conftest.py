@@ -1,5 +1,4 @@
 from datetime import datetime
-import requests
 
 from django.apps import apps
 from django.contrib.auth import get_user_model
@@ -7,7 +6,6 @@ import pytest
 
 from recipes.models import (
     Tag, Ingredient, Recipe, RecipeIngredient, Shopping)
-from tests.constants import USER
 
 
 User = get_user_model()
@@ -143,22 +141,3 @@ def user_create_fix():
         password='12345'
     )
     return user
-
-
-# Fixture check URL.
-
-
-@pytest.fixture
-def auth_token():
-    """
-    Фикстура на получение токена.
-    """
-    url = 'http://127.0.0.1:8000/api/auth/token/login/'
-    credentials = {
-        'email': USER['email'],
-        'password': USER['password']
-    }
-
-    response = requests.post(url, json=credentials)
-    token = response.json().get('auth_token')
-    return token

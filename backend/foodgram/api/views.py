@@ -32,7 +32,14 @@ from .serializers import (
     ShoppingSerializer,
     FavoriteSerializer,
 )
-from recipes.models import Tag, Ingredient, Recipe, Shopping, RecipeIngredient, Favorite
+from recipes.models import (
+    Tag,
+    Ingredient,
+    Recipe,
+    Shopping,
+    RecipeIngredient,
+    Favorite
+)
 from users.models import Follower
 from .filters import NameFilter, RecipeFilter
 from .pagination import CustomPagination
