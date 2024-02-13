@@ -25,7 +25,9 @@ class RecipeFilter(FilterSet):
     is_favorited = BooleanFilter(method="filter_by_favorited")
     author = CharFilter()
     tags = ModelMultipleChoiceFilter(
-        field_name="tags__slug", to_field_name="slug", queryset=Tag.objects.all()
+        field_name="tags__slug",
+        to_field_name="slug",
+        queryset=Tag.objects.all()
     )
 
     def filter_by_shopping_cart(self, queryset, name, value):
