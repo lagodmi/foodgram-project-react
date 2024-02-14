@@ -2,8 +2,6 @@ name: Main foodgram WorkFlow
 
 on:
   push:
-    # branches:
-    #   - main
 
 jobs:
   tests:
@@ -133,6 +131,8 @@ jobs:
       - build_and_push_to_docker_hub
       - build_frontend_and_push_to_docker_hub
       - build_gateway_and_push_to_docker_hub
+
+    if: github.ref == 'refs/heads/main'
 
     steps:
     - name: Checkout repo
