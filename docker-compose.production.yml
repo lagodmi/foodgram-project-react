@@ -31,7 +31,7 @@ services:
       - static:/static
 
   gateway:
-    image: lagdmitrii/kittygram_gateway:latest
+    image: lagdmitrii/foodgram_gateway:latest
     env_file: .env
     depends_on:
       - backend
