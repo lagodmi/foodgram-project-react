@@ -6,7 +6,7 @@
 - Django 3.2.3
 - Django REST framework 3.12.4
 - JavaScript
-## Cсылка на развернутый проект:
+## Cсылку на развернутый проект:
 - http://84.252.142.240:5000
 - foodgram.3utilities.com/signin
 ## Процесс запуска проекта (через docker compose):
