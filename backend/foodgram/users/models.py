@@ -71,6 +71,7 @@ class Follower(models.Model):
     )
 
     class Meta:
+        ordering = ("user",)
         unique_together = ("user", "subscriber")
         verbose_name = "Подписка"
         verbose_name_plural = "Подписки"

@@ -63,11 +63,12 @@ class UserViewSet(UserViewSet):
         return UserListSerializer
 
     def get_permissions(self):
-        if self.action == "list":
-            permission_classes = [AllowAny]
-        else:
-            permission_classes = [AllowAny]
-        return [permission() for permission in permission_classes]
+        return (AllowAny(),)
+        # if self.action == "list":
+        #     permission_classes = [AllowAny]
+        # else:
+        #     permission_classes = [AllowAny]
+        # return [permission() for permission in permission_classes]
 
     @action(
         detail=False,
@@ -104,6 +105,9 @@ class UserViewSet(UserViewSet):
             )
 
         author = get_object_or_404(User, id=id)
+        user = request.user
+        user_filter = user.owner.filter(subscriber=author)
+
         recipes_limit = request.query_params.get("recipes_limit", None)
         context = {
             "request": request,
@@ -116,21 +120,19 @@ class UserViewSet(UserViewSet):
 
         if request.method == "POST":
             serializer.is_valid(raise_exception=True)
-            if (Follower.objects.filter(user=request.user,
-                                        subscriber=author).exists()):
+
+            if user_filter.exists():
                 return Response("Подписка уже оформлена.",
                                 status=HTTP_400_BAD_REQUEST)
-            else:
-                Follower.objects.create(user=request.user, subscriber=author)
-                return Response(serializer.data, status=HTTP_201_CREATED)
+            Follower.objects.create(user=user, subscriber=author)
+            return Response(serializer.data, status=HTTP_201_CREATED)
 
-        try:
-            Follower.objects.get(user=request.user, subscriber=author).delete()
-            return Response("Подписка успешно удалена.",
-                            status=HTTP_204_NO_CONTENT)
-        except Follower.DoesNotExist:
+        if not user_filter:
             return Response("Подписка отсутствует.",
                             status=HTTP_400_BAD_REQUEST)
+        user_filter.delete()
+        return Response("Подписка успешно удалена.",
+                        status=HTTP_204_NO_CONTENT)
 
     @action(detail=False, permission_classes=(IsAuthorOrReadOnly,))
     def subscriptions(self, request):
@@ -265,14 +267,11 @@ class RecipeViewSet(ModelViewSet):
             recipe = Recipe.objects.get(pk=pk)
         except Recipe.DoesNotExist:
             return Response("Рецепт отсутствует.", status=HTTP_404_NOT_FOUND)
+        user_filter = user.favorite_recipes.filter(recipe=recipe)
 
-        try:
-            Favorite.objects.get(user=user, recipe=recipe).delete()
-            return Response(
-                "Рецепт успешно удален из избранного.",
-                status=HTTP_204_NO_CONTENT
-            )
-        except Favorite.DoesNotExist:
-            return Response(
-                "Рецепт отсутствует в избранном.", status=HTTP_400_BAD_REQUEST
-            )
+        if not user_filter:
+            return Response("Рецепт отсутствует в избранном.",
+                            status=HTTP_400_BAD_REQUEST)
+        user_filter.delete()
+        return Response("Рецепт успешно удален из избранного.",
+                        status=HTTP_204_NO_CONTENT)

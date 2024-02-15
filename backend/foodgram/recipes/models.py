@@ -1,6 +1,7 @@
 from typing import Optional
 
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 from users.models import User
 from .constants import (
@@ -11,8 +12,11 @@ from .constants import (
     MAX_LEN_UNIT_INGREDIENT,
     MAX_LEN_NAME_RECIPE,
     UPLOAD_TO_IMAGE_RECIPE,
+    MIN_COOKING_TIME_IN_RECIPE,
+    MAX_COOKING_TIME_IN_RECIPE,
+    MIN_AMOUNT_INGREDIENT_IN_RECIPE,
+    MAX_AMOUNT_INGREDIENT_IN_RECIPE
 )
-from .validators import cooking_time_validator
 
 
 class Tag(models.Model):
@@ -123,8 +127,10 @@ class Recipe(models.Model):
         blank=False,
     )
 
-    cooking_time = models.PositiveIntegerField(
-        verbose_name="Время готовки", validators=(cooking_time_validator,)
+    cooking_time = models.PositiveSmallIntegerField(
+        verbose_name="Время готовки",
+        validators=[MinValueValidator(MIN_COOKING_TIME_IN_RECIPE),
+                    MaxValueValidator(MAX_COOKING_TIME_IN_RECIPE)]
     )
 
     date = models.DateTimeField(verbose_name="Дата публикации",
@@ -159,12 +165,17 @@ class RecipeIngredient(models.Model):
         on_delete=models.CASCADE,
     )
 
-    amount = models.PositiveIntegerField(verbose_name="Количество ингридиента")
+    amount = models.PositiveSmallIntegerField(
+        verbose_name="Количество ингридиента",
+        validators=[MinValueValidator(MIN_AMOUNT_INGREDIENT_IN_RECIPE),
+                    MaxValueValidator(MAX_AMOUNT_INGREDIENT_IN_RECIPE)]
+    )
 
     class Meta:
         verbose_name = "ингредиент в рецепте"
         verbose_name_plural = "ингредиенты в рецепте"
         default_related_name = "recipeingredient"
+        ordering = ("recipe",)
 
     def __str__(self):
         return f"{str(self.recipe)} - {str(self.ingredient)} {self.amount}"
@@ -193,6 +204,7 @@ class Shopping(models.Model):
         verbose_name = "Покупка"
         verbose_name_plural = "Список Покупок"
         default_related_name = "shopping"
+        ordering = ("user",)
 
     def __str__(self):
         return self.recipe.name
@@ -220,9 +232,11 @@ class Favorite(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=("user", "recipe"), name="unique_favorite_user_recipe"
+                fields=("user", "recipe"),
+                name="unique_favorite_user_recipe"
             )
         ]
         verbose_name = "Избранное"
         verbose_name_plural = "Избранные"
         default_related_name = "favorite"
+        ordering = ("user",)
