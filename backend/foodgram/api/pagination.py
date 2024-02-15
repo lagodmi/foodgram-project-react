@@ -7,12 +7,3 @@ class CustomPagination(PageNumberPagination):
     """
 
     page_size_query_param = "limit"
-
-
-# Может понадобиться.
-class CustomPaginationForSubscribe(PageNumberPagination):
-    """
-    Пагинация рецептов в подписке.
-    """
-
-    page_size_query_param = "recipes_limit"
