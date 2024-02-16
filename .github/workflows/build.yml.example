@@ -1,0 +1,94 @@
+name: Build WorkFlow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_and_push_to_docker_hub:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker 
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }} # доступ к dockerhub
+          password: ${{ secrets.DOCKER_PASSWORD }} # доступ к dockerhub
+
+      - name: Push to DockerHub
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend/foodgram/ # путь к Dockerfile
+          push: true
+          tags: lagdmitrii/foodgram_backend:latest # имя под каким сохраниться
+
+  build_frontend_and_push_to_docker_hub:
+    name: Push frontend Docker image to DockerHub
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker 
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }} # доступ к dockerhub
+          password: ${{ secrets.DOCKER_PASSWORD }} # доступ к dockerhub
+
+      - name: Push to DockerHub
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend/ # путь к Dockerfile
+          push: true
+          tags: lagdmitrii/foodgram_frontend:latest # имя под каким сохраниться
+
+  build_gateway_and_push_to_docker_hub:
+    name: Push gateway Docker image to DockerHub
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker 
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }} # доступ к dockerhub
+          password: ${{ secrets.DOCKER_PASSWORD }} # доступ к dockerhub
+
+      - name: Push to DockerHub
+        uses: docker/build-push-action@v4
+        with:
+          context: ./nginx/ # путь к Dockerfile
+          push: true
+          tags: lagdmitrii/foodgram_gateway:latest # имя под каким сохраниться
+  
+  send_message:
+    runs-on: ubuntu-latest
+
+    needs: 
+      - build_and_push_to_docker_hub
+      - build_frontend_and_push_to_docker_hub
+      - build_gateway_and_push_to_docker_hub
+
+    steps:
+    - name: Send message
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_TO }} # 5766924512 id кому надо присылать
+        token: ${{ secrets.TELEGRAM_TOKEN }} # 6978956653:AAERQF3p2sYZ260vgKloIeLQLIJQVKfNEbQ токен бота зарегистрировать на BotFather
+        message: Build выполнен успешно! # сообщение может быть любым

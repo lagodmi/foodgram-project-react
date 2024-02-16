@@ -1,0 +1,54 @@
+name: Deploy WorkFlow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Copy docker-compose.yml via ssh
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.HOST }} # хост сервера
+        username: ${{ secrets.USER }} # user сервера
+        key: ${{ secrets.SSH_KEY }} # SSH доступа на сервер
+        passphrase: ${{ secrets.SSH_PASSPHRASE }} # пароль для доступа на сервер
+        source: "docker-compose.production.yml"
+        target: "foodgram"
+
+    - name: Executing remote ssh commands to deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }} # хост сервера
+        username: ${{ secrets.USER }} # user сервера
+        key: ${{ secrets.SSH_KEY }} # SSH доступа на сервер
+        passphrase: ${{ secrets.SSH_PASSPHRASE }} # пароль для доступа на сервер
+        script: |
+          cd foodgram
+          # Выполняет pull образов с Docker Hub
+          sudo docker compose -f docker-compose.production.yml pull
+          # Перезапускает все контейнеры в Docker Compose
+          sudo docker compose -f docker-compose.production.yml down
+          sudo docker compose -f docker-compose.production.yml up -d
+          # Выполняет миграции и сбор статики
+          sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
+          sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
+          sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/
+
+  send_message:
+    runs-on: ubuntu-latest
+
+    needs: deploy
+
+    steps:
+    - name: Send message
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_TO }} # 5766924512 id кому надо присылать
+        token: ${{ secrets.TELEGRAM_TOKEN }} # 6978956653:AAERQF3p2sYZ260vgKloIeLQLIJQVKfNEbQ токен бота зарегистрировать на BotFather
+        message: Деплой успешно выполнен! # сообщение может быть любым
