@@ -91,6 +91,6 @@ jobs:
     - name: Send message
       uses: appleboy/telegram-action@master
       with:
-        to: ${{ secrets.TELEGRAM_TO }} # 5766924512 id кому надо присылать
-        token: ${{ secrets.TELEGRAM_TOKEN }} # 6978956653:AAERQF3p2sYZ260vgKloIeLQLIJQVKfNEbQ токен бота зарегистрировать на BotFather
-        message: Build выполнен успешно! # сообщение может быть любым
+        to: ${{ secrets.TELEGRAM_TO }} 
+        token: ${{ secrets.TELEGRAM_TOKEN }} 
+        message: Build выполнен успешно! 
