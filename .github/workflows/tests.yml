@@ -1,7 +1,10 @@
 name: Tests WorkFlow
 
+# on:
+#   push:
+
 on:
-  push:
+  workflow_dispatch:
 
 jobs:
   tests:
