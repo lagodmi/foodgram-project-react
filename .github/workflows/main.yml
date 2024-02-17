@@ -1,8 +1,8 @@
 name: Main foodgram WorkFlow
 
 on:
-  push:
-
+  workflow_dispatch:
+    
 jobs:
   tests:
     runs-on: ubuntu-latest
