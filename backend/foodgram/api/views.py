@@ -56,6 +56,10 @@ class UserViewSet(UserViewSet):
 
     queryset = User.objects.all()
     pagination_class = CustomPagination
+    # permission_classes = (AllowAny,)
+
+    def get_permissions(self):
+        return (AllowAny(),)
 
     def get_permissions(self):
         return (AllowAny(),)
